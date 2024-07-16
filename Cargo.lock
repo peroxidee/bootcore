@@ -39,7 +39,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "bootcore"
+name = "jjumper"
 version = "0.1.0"
 dependencies = [
  "libusb",
