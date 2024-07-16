@@ -40,7 +40,7 @@ fn monitor() -> Result<(), Error>{
     let lusb_context.devices.unwrap();
     let prev = lusb_context.devices.unwrap();
     
-    while 1=1 { 
+    loop { 
 
         let connected_usb_devices = lusb_context.devices().unwrap();
         if connected_usb_devices.len() != prev.len(){  
@@ -50,6 +50,8 @@ fn monitor() -> Result<(), Error>{
                     Err(e) => eprintln!("[-] err: {:?}", e)
                 }  
             }
+        sleep(30)
+        
         }
     }
 
