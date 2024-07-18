@@ -6,6 +6,7 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-libusb = "0.3.0"
-mbrman = "0.5.2"
+bit-vec = "0.8.0"
+net = "0.0.2"
+bit-set = "0.8.0"
 rusb = "0.9.4"
